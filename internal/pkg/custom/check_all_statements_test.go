@@ -136,7 +136,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   statement {}
 }
 `)
-	assert.Len(t, scanResults.GetFailed(), 0)
+	assert.Empty(t, scanResults.GetFailed())
 }
 func TestMultipleSubmatchesOntoMultipleStatements(t *testing.T) {
 	scanResults := scanTerraform(t, `

@@ -16,7 +16,7 @@ min_required_version: v1.2.0
 `
 	c := load(t, "config.yaml", content)
 
-	assert.Equal(t, c.MinimumRequiredVersion, "v1.2.0")
+	assert.Equal(t, "v1.2.0", c.MinimumRequiredVersion)
 }
 
 func TestMinRequiredVersionFromJSON(t *testing.T) {
@@ -26,7 +26,7 @@ func TestMinRequiredVersionFromJSON(t *testing.T) {
 `
 	c := load(t, "config.json", content)
 
-	assert.Equal(t, c.MinimumRequiredVersion, "v1.2.0")
+	assert.Equal(t, "v1.2.0", c.MinimumRequiredVersion)
 }
 
 func TestExcludesElementsFromYAML(t *testing.T) {
@@ -61,7 +61,7 @@ exclude_ignores:
 	c := load(t, "config.yaml", content)
 
 	assert.Contains(t, c.SeverityOverrides, "AWS018")
-	assert.Len(t, c.GetValidExcludedChecks(), 0)
+	assert.Empty(t, c.GetValidExcludedChecks())
 	assert.Contains(t, c.ExcludeIgnores, "DP002")
 }
 

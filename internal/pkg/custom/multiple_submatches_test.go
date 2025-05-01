@@ -63,7 +63,7 @@ resource "aws_instance" "bastion" {
 }
 `)
 	customResults := filterCustomResults(scanResults)
-	assert.Len(t, customResults.GetFailed(), 0)
+	assert.Empty(t, customResults.GetFailed())
 }
 
 func TestInstanceMetadataEndpointMissing(t *testing.T) {

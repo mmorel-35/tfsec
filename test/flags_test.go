@@ -24,8 +24,8 @@ func Test_Flag_SingleThread(t *testing.T) {
 	// here we test that everything still works as normal with the flag
 	// as it's difficult to test that multiple go-routines aren't used...
 	out, err, exit := runWithArgs("--single-thread", "./testdata/pass")
-	assert.Greater(t, len(out), 0)
-	assert.Len(t, err, 0)
+	assert.NotEmpty(t, out)
+	assert.Empty(t, err)
 	assert.Equal(t, 0, exit)
 }
 
@@ -37,7 +37,7 @@ func Test_Flag_DisableGrouping(t *testing.T) {
 
 func Test_Flag_IgnoreHCLErrors(t *testing.T) {
 	_, err, exit := runWithArgs("./testdata/badhcl", "--ignore-hcl-errors")
-	assert.Len(t, err, 0)
+	assert.Empty(t, err)
 	assert.Equal(t, 0, exit)
 }
 
@@ -55,7 +55,7 @@ func Test_Flag_NoColor(t *testing.T) {
 
 func Test_Flag_Version(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/pass", "--version")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	assert.Equal(t, "You are running a locally built version of tfsec.\n", out)
 	assert.Equal(t, 0, exit)
 }
@@ -67,7 +67,7 @@ func Test_Flag_VersionWithOverride(t *testing.T) {
 	}()
 	version.Version = "v1.2.3"
 	out, err, exit := runWithArgs("./testdata/pass", "--version")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	assert.Equal(t, "v1.2.3\n", out)
 	assert.Equal(t, 0, exit)
 }
@@ -75,14 +75,14 @@ func Test_Flag_VersionWithOverride(t *testing.T) {
 func Test_Flag_Format_JSON_WithFailures(t *testing.T) {
 	out, _, exit := runWithArgs("./testdata/fail", "-f", "json")
 	results := parseJSON(t, out)
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 	assert.Equal(t, 1, exit)
 }
 
 func Test_Flag_Format_JSON_WithPass(t *testing.T) {
 	out, _, exit := runWithArgs("./testdata/pass", "-f", "json")
 	results := parseJSON(t, out)
-	assert.Equal(t, len(results), 0)
+	assert.Empty(t, results)
 	assert.Equal(t, 0, exit)
 }
 
@@ -131,7 +131,7 @@ func Test_Flag_Format_SARIF(t *testing.T) {
 func Test_Flag_Exclude_Single(t *testing.T) {
 	originalOut, _, _ := runWithArgs("./testdata/fail", "-f", "json")
 	originalResults := parseJSON(t, originalOut)
-	require.Greater(t, len(originalResults), 0)
+	require.NotEmpty(t, originalResults)
 
 	exclude := originalResults[0].LongID
 	out, _, _ := runWithArgs("./testdata/fail", "-f", "json", "-e", exclude)
@@ -147,7 +147,7 @@ func Test_Flag_Exclude_Single(t *testing.T) {
 func Test_Flag_Exclude_Multiple(t *testing.T) {
 	originalOut, _, _ := runWithArgs("./testdata/fail", "-f", "json")
 	originalResults := parseJSON(t, originalOut)
-	require.Greater(t, len(originalResults), 0)
+	require.NotEmpty(t, originalResults)
 
 	countExclude := 3
 	var excludes []string
@@ -194,7 +194,7 @@ func Test_Flag_Exclude_Multiple(t *testing.T) {
 func Test_Flag_FilterResults(t *testing.T) {
 	originalOut, _, _ := runWithArgs("./testdata/fail", "-f", "json")
 	originalResults := parseJSON(t, originalOut)
-	require.Greater(t, len(originalResults), 0)
+	require.NotEmpty(t, originalResults)
 
 	countFilter := 3
 	var filters []string
@@ -242,7 +242,7 @@ func Test_Flag_SoftFail(t *testing.T) {
 	for _, flag := range []string{"-s", "--soft-fail"} {
 		t.Run(flag, func(t *testing.T) {
 			out, _, exit := runWithArgs("./testdata/fail", flag)
-			assert.Greater(t, len(parseLovely(t, out)), 0, "results should still be output when soft fail is used")
+			assert.NotEmpty(t, parseLovely(t, out), "results should still be output when soft fail is used")
 			assert.Equal(t, 0, exit)
 		})
 	}
@@ -252,7 +252,7 @@ func Test_Flag_TFVarsFile(t *testing.T) {
 	_, _, exit := runWithArgs("./testdata/tfvars/tf")
 	assert.Equal(t, 0, exit)
 	out, _, exit := runWithArgs("./testdata/tfvars/tf", "--tfvars-file", "./testdata/tfvars/test.tfvars")
-	assert.Greater(t, len(parseLovely(t, out)), 0, "results should be detected if the tfvars file has been applied")
+	assert.NotEmpty(t, parseLovely(t, out), "results should be detected if the tfvars file has been applied")
 	assert.Equal(t, 1, exit)
 }
 
@@ -306,19 +306,19 @@ func Test_Flag_Out(t *testing.T) {
 	defer func() { _ = os.RemoveAll(tmp) }()
 	file := filepath.Join(tmp, "tfsec_output.json")
 	out, _, exit := runWithArgs("./testdata/fail", "--out", file, "-f", "json")
-	assert.Len(t, out, 0)
+	assert.Empty(t, out)
 	assert.Equal(t, 1, exit)
 	data, err := os.ReadFile(file)
 	require.NoError(t, err)
 	results := parseJSON(t, string(data))
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 }
 
 func Test_Flag_CustomCheckDir(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/custom", "--custom-check-dir", "./testdata/custom")
 	results := parseLovely(t, out)
 	assert.Len(t, results, 1)
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	assert.Equal(t, 1, exit)
 }
 
@@ -326,7 +326,7 @@ func Test_Flag_ConfigFile(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/config", "--config-file", "./testdata/config/config.yml")
 	results := parseLovely(t, out)
 	assertResultsNotContain(t, results, "aws-s3-enable-versioning")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	assert.Equal(t, 1, exit)
 }
 
@@ -344,7 +344,7 @@ func Test_Flag_Debug(t *testing.T) {
 
 func Test_Flag_ConciseOutput(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/fail", "--concise-output")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	_ = parseLovely(t, out)
 	assert.NotContains(t, out, "adaptation")
 	assert.Equal(t, 1, exit)
@@ -352,43 +352,43 @@ func Test_Flag_ConciseOutput(t *testing.T) {
 
 func Test_Flag_ExcludeDownloaded(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/external-module", "--exclude-downloaded-modules")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Len(t, results, 0)
+	assert.Empty(t, results)
 	assert.Equal(t, 0, exit)
 }
 
 func Test_Flag_IncludePassed(t *testing.T) {
 	before, err, _ := runWithArgs("./testdata/mixed")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	beforeResults := parseLovely(t, before)
 	out, err, _ := runWithArgs("./testdata/mixed", "--include-passed")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
 	assert.Greater(t, len(results), len(beforeResults), "passed results should be included")
 }
 
 func Test_Flag_IncludeIgnored(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/ignored", "--include-ignored")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 	assert.Equal(t, 0, exit)
 }
 
 func Test_Flag_NoIgnores(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/ignored", "--no-ignores")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 	assert.Equal(t, 1, exit)
 }
 
 func Test_Flag_ForceAllDirs(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/nested", "--force-all-dirs")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 	assert.Equal(t, 1, exit)
 }
 
@@ -400,37 +400,37 @@ func Test_Flag_RunStatistics(t *testing.T) {
 
 func Test_Flag_Workspace(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/nested", "--workspace", "testing")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Equal(t, len(results), 0)
+	assert.Empty(t, results)
 	assert.Equal(t, 0, exit)
 }
 
 func Test_Flag_MinimumSeverity(t *testing.T) {
 	before, err, _ := runWithArgs("./testdata/fail")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	beforeResults := parseLovely(t, before)
 
 	out, err, _ := runWithArgs("./testdata/fail", "--minimum-severity", "MEDIUM")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
 	assert.Less(t, len(results), len(beforeResults))
 }
 
 func Test_Flag_ConfigFile_WithMinimumSeverity(t *testing.T) {
 	before, err, _ := runWithArgs("./testdata/fail")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	beforeResults := parseLovely(t, before)
 
 	out, err, _ := runWithArgs("./testdata/fail", "--config-file", "./testdata/config-minimum-severity/config.yml")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
 	assert.Less(t, len(results), len(beforeResults))
 }
 
 func Test_Flag_RegoPolicyDir(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/rego/tf", "--rego-policy-dir", "./testdata/rego/policies")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
 	assertResultsContain(t, results, "custom.rego.rego.sauce")
 	assert.Equal(t, 1, exit)
@@ -438,7 +438,7 @@ func Test_Flag_RegoPolicyDir(t *testing.T) {
 
 func Test_Flag_PrintRegoInput(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/fail", "--print-rego-input")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 
 	var raw interface{}
 
@@ -456,15 +456,15 @@ func Test_Flag_PrintRegoInput(t *testing.T) {
 func Test_Flag_NoModuleDownloads(t *testing.T) {
 	_ = os.RemoveAll("./.tfsec")
 	out, err, exit := runWithArgs("./testdata/external-module", "--no-module-downloads", "--include-ignored")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Len(t, results, 0, out)
+	assert.Empty(t, results, out)
 	assert.Equal(t, 0, exit)
 }
 
 func Test_Flag_RegoOnly(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/rego/tf", "--rego-policy-dir", "./testdata/rego/policies", "--rego-only")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
 	assertResultsContain(t, results, "custom.rego.rego.sauce")
 	assert.Len(t, results, 1)
@@ -474,7 +474,7 @@ func Test_Flag_RegoOnly(t *testing.T) {
 func Test_Flag_ConfigFileUrl(t *testing.T) {
 	configFileUrl := "https://raw.githubusercontent.com/aquasecurity/tfsec/master/_examples/with_config_overrides/.tfsec/config.yml"
 	out, err, exit := runWithArgs("./testdata/with_config_overrides", "--config-file-url", configFileUrl)
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	result := parseLovely(t, out)
 	assertResultsContain(t, result, "aws-s3-specify-public-access-block")
 	assert.Len(t, result, 1)
@@ -484,7 +484,7 @@ func Test_Flag_ConfigFileUrl(t *testing.T) {
 func Test_Flag_ConfigFileUrlNotFound(t *testing.T) {
 	configFileUrl := "https://raw.githubusercontent.com/aquasecurity/tfsec/master/_examples/with_config_overrides/.tfsec/config_not_found.yml"
 	out, err, exit := runWithArgs("./testdata/with_config_overrides", "--config-file-url", configFileUrl)
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	result := parseLovely(t, out)
 	assertResultsContain(t, result, "aws-s3-specify-public-access-block")
 	assert.Len(t, result, 9)
@@ -494,7 +494,7 @@ func Test_Flag_ConfigFileUrlNotFound(t *testing.T) {
 func Test_Flag_CustomCheckUrlNotFound(t *testing.T) {
 	customCheckUrl := "https://raw.githubusercontent.com/aquasecurity/tfsec/master/_examples/custom/.tfsec/custom_tfchecks_not_found.yaml"
 	out, err, exit := runWithArgs("./testdata/custom_url", "--custom-check-url", customCheckUrl)
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	result := parseLovely(t, out)
 	assertResultsContain(t, result, "aws-s3-specify-public-access-block")
 	assert.Len(t, result, 43)
@@ -504,7 +504,7 @@ func Test_Flag_CustomCheckUrlNotFound(t *testing.T) {
 func Test_Flag_CustomCheckUrl(t *testing.T) {
 	customCheckUrl := "https://raw.githubusercontent.com/aquasecurity/tfsec/master/_examples/custom/.tfsec/custom_tfchecks.yaml"
 	out, err, exit := runWithArgs("./testdata/custom_url", "--custom-check-url", customCheckUrl)
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	result := parseLovely(t, out)
 	assertResultsContain(t, result, "aws-s3-specify-public-access-block")
 	assert.Len(t, result, 55)

@@ -24,8 +24,8 @@ func Test_Failure(t *testing.T) {
 
 func Test_Pass(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/pass")
-	assert.Greater(t, len(out), 0)
-	assert.Len(t, err, 0)
+	assert.NotEmpty(t, out)
+	assert.Empty(t, err)
 	assert.Equal(t, 0, exit)
 }
 
@@ -52,31 +52,31 @@ func Test_ColouredOutputByDefault(t *testing.T) {
 
 func Test_LovelyOutputByDefault(t *testing.T) {
 	out, _, exit := runWithArgs("./testdata/fail")
-	assert.Greater(t, len(parseLovely(t, out)), 0)
+	assert.NotEmpty(t, parseLovely(t, out))
 	assert.Equal(t, 1, exit)
 }
 
 func Test_ModuleDownloads(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/external-module")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 	assert.Equal(t, 1, exit)
 }
 
 func Test_Ignores(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/ignored")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Len(t, results, 0)
+	assert.Empty(t, results)
 	assert.Equal(t, 0, exit)
 }
 
 func Test_RootDirsOnly(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/nested")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Len(t, results, 0)
+	assert.Empty(t, results)
 	assert.Equal(t, 0, exit)
 }
 
@@ -96,8 +96,8 @@ func Test_PanicsAreRecovered(t *testing.T) {
 
 func Test_WorkspaceDefault(t *testing.T) {
 	out, err, exit := runWithArgs("./testdata/workspace")
-	assert.Equal(t, "", err)
+	assert.Empty(t, err)
 	results := parseLovely(t, out)
-	assert.Greater(t, len(results), 0)
+	assert.NotEmpty(t, results)
 	assert.Equal(t, 1, exit)
 }

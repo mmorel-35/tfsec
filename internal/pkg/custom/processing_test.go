@@ -566,7 +566,7 @@ resource "google_compute_instance" "default" {
 		t.Run(test.name, func(t *testing.T) {
 			block := parseFromSource(t, test.source)[0].GetBlocks()[0]
 			result := evalMatchSpec(block, &test.predicateMatchSpec, NewEmptyCustomContext())
-			assert.Equal(t, result, test.expected, "`regexMatches` match function evaluating incorrectly.")
+			assert.Equal(t, test.expected, result, "`regexMatches` match function evaluating incorrectly.")
 		})
 	}
 }
@@ -881,7 +881,7 @@ resource "aws_instance" "foo" {
 		t.Run(test.name, func(t *testing.T) {
 			block := parseFromSource(t, test.source)[0].GetBlocks()[0]
 			result := evalMatchSpec(block, &test.matchSpec, NewEmptyCustomContext())
-			assert.Equal(t, result, test.expected, "subMatch evaluation function for attributes behaving incorrectly.")
+			assert.Equal(t, test.expected, result, "subMatch evaluation function for attributes behaving incorrectly.")
 		})
 	}
 }
@@ -967,7 +967,7 @@ func TestSubMatchOnes(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			block := parseFromSource(t, test.source)[0].GetBlocks()[0]
 			result := evalMatchSpec(block, &test.matchSpec, NewEmptyCustomContext())
-			assert.Equal(t, result, test.expected, "`subMatchOne` handling function evaluating incorrectly.")
+			assert.Equal(t, test.expected, result, "`subMatchOne` handling function evaluating incorrectly.")
 		})
 	}
 }
